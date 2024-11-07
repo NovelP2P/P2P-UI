@@ -41,6 +41,8 @@ const Button = ({
 
 const OrderBookPage = () => {
   const { writeContract } = useWriteContract();
+  const [tokenA, setTokenA] = useState("");
+  const [tokenB, setTokenB] = useState("");
   const [partialFill, setPartialFill] = useState(false);
   const [tokenToSell, setTokenToSell] = useState("");
   const [tokenToBuy, setTokenToBuy] = useState("");
@@ -55,10 +57,10 @@ const OrderBookPage = () => {
     address,
     abi,
     functionName: 'getOrderBook',
-    args: [tokenToBuy, tokenToSell]
+    args: [tokenA, tokenB]
   });
-  console.log(mockOrders.data);
-  const orders = [];
+  console.log("token",tokenA,tokenB)
+  console.log("mockdata",mockOrders.data);
 
   const handlePartialFilled = (e: React.SyntheticEvent) => {
     setPartialFill(e.target.checked);
@@ -85,7 +87,7 @@ const OrderBookPage = () => {
               <div className='flex text-black gap-1'>
                 <select
                   className="w-1/2 px-1 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  onChange={(e) => handleTokenToSellChange(e.target.value)}
+                  onChange={(e) => setTokenA(e.target.value)}
                 >
                   {Object.keys(tokenOptions).map((token) => (
                     <option key={token} value={tokenOptions[token]}>
@@ -96,7 +98,7 @@ const OrderBookPage = () => {
                 <div className='text-5xl mt-2'><ArrowRightLeft /></div>
                 <select
                   className="w-1/2 px-1 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  onChange={(e) => handleTokenToBuyChange(e.target.value)}
+                  onChange={(e) => setTokenB(e.target.value)}
                 >
                   {Object.keys(tokenOptions).map((token,index) =>{
                     return(
@@ -121,12 +123,20 @@ const OrderBookPage = () => {
                     <th className="p-3">Amount</th>
                     <th className="p-3">MAX/MIN</th>
                     <th className="p-3">Expiry</th>
-                    <th className="p-3">Timelock</th>
                     <th className="p-3">Action</th>
                   </tr>
                 </thead>
                 <tbody className='text-gray-500'>
-                  <Orders />
+                  {
+                    mockOrders.data?.map((orderId:BigInt)=>{
+                      console.log("order",orderId)
+                      return(
+                        <Orders key={orderId} id={orderId}/>
+                      )
+                    }
+                      
+                    )
+                  }
                   {/* {mockOrders.data?.map((order) => (
                     <tr key={order.orderId} className="border-t">
                       <td className="p-3">
