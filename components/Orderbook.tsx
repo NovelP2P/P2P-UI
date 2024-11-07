@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowRightLeft, Plus } from 'lucide-react';
-import { useWriteContract, useReadContract } from 'wagmi';
+import { useWaitForTransactionReceipt,useWriteContract, useReadContract } from 'wagmi';
 import { parseEther } from 'viem';
-import { abi, address } from "@/app/utils/abi";
+import { abi, address,erc20abi } from "@/app/utils/abi";
 import Orders from './Orders';
 
 // Token options
@@ -12,7 +12,11 @@ const tokenOptions = {
   DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
   LINK: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
   MTK1:'0x38d6939b75a29119CC1b1E317Ff7bcfa58a7e198',
-  MTK2:'0xC485a8fE828e730EaDCBEB432eF5937dFD5b471a'
+  MTK2:'0xC485a8fE828e730EaDCBEB432eF5937dFD5b471a',
+  MST:'0xBddbaC11418Bf2Cc1B9c995076775910b580d81c',
+  SKY:'0x5f7943c5Dc9b0c81dC0CAfE1Dcc3579f924B5C7f',
+  RTK1:"0xeb88a8425bEDE672dcB7224ecA973478A8c5413a",
+  RTK2:"0xd6EECddC1695cbc43982e14Cc33aEcaE27d824B6"
 };
 
 // Custom Button Component
@@ -40,7 +44,7 @@ const Button = ({
 };
 
 const OrderBookPage = () => {
-  const { writeContract } = useWriteContract();
+  const { data: hash,isPending, writeContract } = useWriteContract();
   const [tokenA, setTokenA] = useState("");
   const [tokenB, setTokenB] = useState("");
   const [partialFill, setPartialFill] = useState(false);
@@ -48,6 +52,7 @@ const OrderBookPage = () => {
   const [tokenToBuy, setTokenToBuy] = useState("");
   const [amountToSell, setAmountToSell] = useState("");
   const [amountToBuy, setAmountToBuy] = useState("");
+  const [hashlock, setHashlock] = useState("");
   const [minTradeAmount, setMinTradeAmount] = useState("0");
   const [maxTradeAmount, setMaxTradeAmount] = useState("0");
   const [timelock, setTimelock] = useState(0);
@@ -73,6 +78,38 @@ const OrderBookPage = () => {
   const handleTokenToBuyChange = (token: string) => {
     setTokenToBuy(token);
   };
+  
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    writeContract({
+          address,
+          abi,
+          functionName: 'createOrder',
+          args: [
+            tokenToSell,
+            tokenToBuy,
+            parseEther(amountToSell),
+            parseEther(amountToBuy),
+            parseEther(minTradeAmount),
+            parseEther(maxTradeAmount),
+            partialFill,
+            BigInt(timelock),
+            hashlock
+          ]
+      });
+  
+      console.log('Order created');
+  };
+
+  // const approve=(e: React.FormEvent)=>{
+  //   e.preventDefault();
+  //   writeContract({
+  //     address: tokenToSell,
+  //     abi: erc20abi,
+  //     functionName: 'approve',
+  //     args: [address, parseEther(amountToSell)]
+  //   });
+  // }
   
   return (
     <div className="container flex flex-col mx-auto gap-2 px-4 py-8">
@@ -165,26 +202,7 @@ const OrderBookPage = () => {
             <h2 className="text-xl font-bold text-black">Create Order</h2>
           </div>
           <div className="p-4">
-            <form className="space-y-4" onSubmit={(e: React.FormEvent) => {
-              e.preventDefault();
-
-              writeContract({
-                address,
-                abi,
-                functionName: 'createOrder',
-                args: [
-                  tokenToSell,
-                  tokenToBuy,
-                  parseEther(amountToSell),
-                  parseEther(amountToBuy),
-                  parseEther(minTradeAmount),
-                  parseEther(maxTradeAmount),
-                  partialFill,
-                  BigInt(timelock)
-                ],
-                value: parseEther("0")
-              });
-            }}>
+            <form className="space-y-4" onSubmit={handleFormSubmit}>
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   I want to sell
@@ -200,7 +218,6 @@ const OrderBookPage = () => {
                     className="w-1/2 px-1 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     onChange={(e) => handleTokenToSellChange(e.target.value)}
                   >
-                    <option value="">Select Token A</option>
                     {Object.keys(tokenOptions).map((token) => (
                       <option key={token} value={tokenOptions[token]}>
                         {token}
@@ -225,7 +242,6 @@ const OrderBookPage = () => {
                     className="w-1/2 px-1 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     onChange={(e) => handleTokenToBuyChange(e.target.value)}
                   >
-                    <option value="">Select Token B</option>
                     {Object.keys(tokenOptions).map((token) => (
                       <option key={token} value={tokenOptions[token]}>
                         {token}
@@ -243,18 +259,18 @@ const OrderBookPage = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                       placeholder="Min amount"
                       onChange={(e) => setMinTradeAmount((e.target.value))}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-600">
+                    <label className="block text-sm font-medium mb-1 text-gray-600 ">
                       Max Trade
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                       placeholder="Max amount"
                       onChange={(e) => setMaxTradeAmount((e.target.value))}
                     />
@@ -268,22 +284,35 @@ const OrderBookPage = () => {
                 </label>
                 <input
                   type="datetime-local"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   onChange={(e) => setTimelock(Math.floor(new Date(e.target.value).getTime() / 1000))}
                 />
               </div>
-
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-600">
+                  Secret Hash
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  onChange={(e) => setHashlock(e.target.value)}
+                />
+              </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="partial" onChange={handlePartialFilled} />
                 <label htmlFor="partial" className="text-sm text-gray-600">
                   Allow partial fills
                 </label>
               </div>
-
-              <Button type="submit" className="w-full flex items-center justify-center" >
+              <div className='flex gap-1'>
+              {/* <Button className="w-1/2 flex items-center justify-center" onClick={approve}>
+                Approve
+              </Button> */}
+              <Button className="w-full flex items-center justify-center" type="submit">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Order
               </Button>
+              </div>
             </form>
           </div>
         </div>

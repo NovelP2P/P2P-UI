@@ -31,7 +31,11 @@ const Orders = ({id}:{id:BigInt}) => {
         '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063':"DAI",
         '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39':"LINK",
         '0x38d6939b75a29119CC1b1E317Ff7bcfa58a7e198':"MTK1",
-        '0xC485a8fE828e730EaDCBEB432eF5937dFD5b471a':"MTK2"
+        '0xC485a8fE828e730EaDCBEB432eF5937dFD5b471a':"MTK2",
+        '0x5f7943c5Dc9b0c81dC0CAfE1Dcc3579f924B5C7f':"SKY",
+        "0xBddbaC11418Bf2Cc1B9c995076775910b580d81c":"MST",
+        "0xeb88a8425bEDE672dcB7224ecA973478A8c5413a":"RTK1",
+        "0xd6EECddC1695cbc43982e14Cc33aEcaE27d824B6":"RTK2"
       };
     console.log(id)
     const orders= useReadContract({
@@ -46,7 +50,7 @@ const Orders = ({id}:{id:BigInt}) => {
   return (
     <>
       <tr>
-        <td className="p-3">{orderArray[4]/orderArray[5]} {token}</td>
+        <td className="p-3">{parseFloat(orderArray[4]/orderArray[5])} {token}</td>
         <td className="p-3">{Number(orderArray[4])/10**18}</td>
         <td className="p-3">{Number(orderArray[7])/10**18}/{Number(orderArray[6])/10**18}</td>
         <td className="p-3">{new Date(Number(orderArray[9])*1000).toDateString()}</td>
