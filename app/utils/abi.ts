@@ -165,9 +165,9 @@ export const abi= [
 				"type": "uint256"
 			},
 			{
-				"internalType": "bytes32",
+				"internalType": "string",
 				"name": "preimage",
-				"type": "bytes32"
+				"type": "string"
 			}
 		],
 		"name": "completeSwap",
@@ -216,6 +216,11 @@ export const abi= [
 				"internalType": "uint256",
 				"name": "_timelock",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_preImage",
+				"type": "string"
 			}
 		],
 		"name": "createOrder",
@@ -414,6 +419,11 @@ export const abi= [
 				"type": "uint256"
 			},
 			{
+				"internalType": "bytes32",
+				"name": "hashlock",
+				"type": "bytes32"
+			},
+			{
 				"internalType": "bool",
 				"name": "isActive",
 				"type": "bool"
@@ -529,4 +539,4 @@ export const abi= [
 		"type": "function"
 	}
 ]
-export const address= "0x4Cb41D0a685A5Afd5198d1d7F43e7D021821ea12";
+export const address= "0x41019150133A0bb3151A763916aF8077BCD8a304";
