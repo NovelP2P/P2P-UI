@@ -529,3 +529,4 @@ export const abi= [
 		"type": "function"
 	}
 ]
+export const address= "0x4Cb41D0a685A5Afd5198d1d7F43e7D021821ea12";
