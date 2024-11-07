@@ -113,7 +113,26 @@ const OrderBookPage = () => {
             <h2 className="text-xl font-bold text-black">Create Order</h2>
           </div>
           <div className="p-4">
-            <form className="space-y-4" onSubmit={(e)=>e.preventDefault}>
+          <form className="space-y-4" onSubmit={(e:React.FormEvent)=>{
+              e.preventDefault();
+              
+              writeContract({
+                address:"0x4Cb41D0a685A5Afd5198d1d7F43e7D021821ea12",
+                abi,
+                functionName:'createOrder',
+                args:[
+                  tokenToSell,
+                  tokenToBuy,
+                  parseEther(amountToSell),
+                  parseEther(amountToBuy),
+                  parseEther(minTradeAmount),
+                  parseEther(maxTradeAmount),
+                  partialFill,
+                  BigInt(timelock)
+                  ],
+                  value:parseEther("0")
+              })
+            }}>
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   I want to sell
@@ -199,17 +218,7 @@ const OrderBookPage = () => {
                 </label>
               </div>
 
-              <Button type="submit" className="w-full flex items-center justify-center" onClick={()=>writeContract({
-                address:"0x4DC0e8e9aBA0A30D5984284ed1b1CfA18F14bb02",
-                abi,
-                functionName:'createOrder',
-                args:[tokenToSell,tokenToBuy,parseEther(amountToSell),
-                  parseEther(amountToBuy)
-                  ,parseEther(minTradeAmount),
-                  parseEther(maxTradeAmount),
-                  timelock,
-                  partialFill]
-              })}>
+              <Button type="submit" className="w-full flex items-center justify-center" >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Order
               </Button>
