@@ -25,6 +25,8 @@ export default function Swaps() {
       args:[userAddress]
     })
     console.log(userSwaps.data)
+    const data = Array.isArray(userSwaps.data)?userSwaps.data:[];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md">
@@ -46,7 +48,7 @@ export default function Swaps() {
               </thead>
               <tbody>
                 {/* Add swap data here */}
-                {userSwaps.data && userSwaps.data?.map((swap)=>{
+                {data && data?.map((swap)=>{
                   console.log(swap.activeSwaps.length)
                   for(let i=0;i<swap.activeSwaps.length;i++){
                     return(

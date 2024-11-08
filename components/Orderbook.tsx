@@ -66,8 +66,8 @@ const OrderBookPage = () => {
   });
   console.log("token",tokenA,tokenB)
   console.log("mockdata",mockOrders.data);
-
-  const handlePartialFilled = (e: React.SyntheticEvent) => {
+  const data = Array.isArray(mockOrders.data)?mockOrders.data:[]
+  const handlePartialFilled = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPartialFill(e.target.checked);
   };
 
@@ -165,10 +165,10 @@ const OrderBookPage = () => {
                 </thead>
                 <tbody className='text-gray-500'>
                   {
-                    mockOrders.data?.map((orderId:BigInt)=>{
+                    data?.map((orderId:BigInt)=>{
                       console.log("order",orderId)
                       return(
-                        <Orders key={orderId} id={orderId}/>
+                        <Orders key={Number(orderId)} id={orderId}/>
                       )
                     }
                       

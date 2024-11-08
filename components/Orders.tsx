@@ -50,7 +50,7 @@ const Orders = ({id}:{id:BigInt}) => {
   return (
     <>
       <tr>
-        <td className="p-3">{parseFloat(orderArray[4]/orderArray[5])} {token}</td>
+        <td className="p-3">{parseFloat((orderArray[4]/orderArray[5]).toString())} {token}</td>
         <td className="p-3">{Number(orderArray[4])/10**18}</td>
         <td className="p-3">{Number(orderArray[7])/10**18}/{Number(orderArray[6])/10**18}</td>
         <td className="p-3">{new Date(Number(orderArray[9])*1000).toDateString()}</td>

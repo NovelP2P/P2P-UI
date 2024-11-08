@@ -1,12 +1,14 @@
 "use client"
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Camera, Clock } from 'lucide-react';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { abi, address } from "@/app/utils/abi";
 import { parseEther } from 'viem';
 
-const SwapPage = ({orderId}:{orderId:number}) => {
+const SwapPage = () => {
+  const params = useParams();
+  const orderId = typeof params.id === 'string' ? parseInt(params.id) : 0;
   const [amount, setAmount] = useState('');
   const [timelock, setTimelock] = useState(0);
     const {data:order} = useReadContract({

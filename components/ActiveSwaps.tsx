@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ButtonHTMLAttributes, useState } from 'react';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { address, abi } from "@/app/utils/abi";
 import {
@@ -8,7 +8,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const Button = ({ children, variant = 'primary', className = '', ...props }) => {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'danger';  // add any other variants you have
+  className?: string;
+}
+
+interface swapProps{
+  swapId:BigInt,
+  orderId:BigInt,
+  participant:string,
+  participantAmount:BigInt,
+  timelock:BigInt
+}
+
+const Button = ({ children, variant = 'primary', className = '', ...props }:ButtonProps) => {
   const baseStyles = "px-4 py-2 rounded-lg font-medium transition-colors";
   const variants = {
     primary: "bg-blue-500 hover:bg-blue-600 text-white",
@@ -30,12 +44,12 @@ const ActiveSwaps = ({id}: {id: BigInt[]}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [secretKey, setSecretKey] = useState('');
   
-  const swap = useReadContract({
+  const {data:swap} = useReadContract({
     address,
     abi,
     functionName: 'getSwapBySwapId',
     args: [id]
-  });
+  }) as {data:swapProps};
 
   const handleVerifyClick = () => {
     setIsModalOpen(true);
@@ -58,12 +72,12 @@ const ActiveSwaps = ({id}: {id: BigInt[]}) => {
   return (
     <>
       <tr className='text-black'>
-        <td className="p-3">{swap.data?.swapId}</td>
-        <td className="p-3">{swap.data?.orderId}</td>
-        <td className="p-3">{swap.data?.participant}</td>
-        <td className="p-3">{Number(swap.data?.participantAmount)/10**18}</td>
+        <td className="p-3">{swap?.swapId.toString()}</td>
+        <td className="p-3">{swap?.orderId.toString()}</td>
+        <td className="p-3">{swap?.participant.toString()}</td>
+        <td className="p-3">{Number(swap?.participantAmount)/10**18}</td>
         <td className="p-3">
-          {new Date(Number(swap.data?.timelock)*1000).toDateString()}
+          {new Date(Number(swap?.timelock)*1000).toDateString()}
         </td>
         <td className="p-3">
           <Button onClick={handleVerifyClick}>
