@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Web3Provider,config } from "@/scripts/Web3Provider";
 import { ConnectKitButton } from "connectkit";
 import { WagmiProvider } from 'wagmi'
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] })
 const queryClient = new QueryClient()
@@ -22,6 +23,7 @@ export default function RootLayout({
       <WagmiProvider config={config}>
     <html lang="en">
       <body className={`${inter.className} bg-gray-50`}>
+        <Toaster/>
         <nav className="bg-white border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRightLeft, Plus } from 'lucide-react';
-import { useWaitForTransactionReceipt,useWriteContract, useReadContract } from 'wagmi';
+import { useWaitForTransactionReceipt,useWriteContract, useReadContract, useWatchContractEvent } from 'wagmi';
 import { parseEther } from 'viem';
 import { abi, address,erc20abi } from "@/app/utils/abi";
 import Orders from './Orders';
+import toast from 'react-hot-toast';
 
 // Token options
 const tokenOptions = {
@@ -56,7 +57,9 @@ const OrderBookPage = () => {
   const [minTradeAmount, setMinTradeAmount] = useState("0");
   const [maxTradeAmount, setMaxTradeAmount] = useState("0");
   const [timelock, setTimelock] = useState(0);
-
+  const [isApproveSuccess,setIsApproveSuccess] = useState(false);
+  const [buttonText,setButtonText] = useState("Create The Order");
+  const [buttonClicked,setButtonClicked]=useState(false);
   // Mock data for demonstration
   const mockOrders = useReadContract({
     address,
@@ -78,38 +81,88 @@ const OrderBookPage = () => {
   const handleTokenToBuyChange = (token: string) => {
     setTokenToBuy(token);
   };
-  
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    writeContract({
-          address,
-          abi,
-          functionName: 'createOrder',
-          args: [
-            tokenToSell,
-            tokenToBuy,
-            parseEther(amountToSell),
-            parseEther(amountToBuy),
-            parseEther(minTradeAmount),
-            parseEther(maxTradeAmount),
-            partialFill,
-            BigInt(timelock),
-            hashlock
-          ]
-      });
-  
-      console.log('Order created');
-  };
+  const { data: currentAllowance } = useReadContract({
+    address: tokenToSell as `0x{string}`,
+    abi: erc20abi,
+    functionName: 'allowance',
+    args: [address, address], // spenderAddress is your contract address
+  }) as {data:bigint}
+ 
+  const { writeContract: approveToken  } = useWriteContract()
+  const { writeContract: createOrder } = useWriteContract()
 
-  // const approve=(e: React.FormEvent)=>{
-  //   e.preventDefault();
-  //   writeContract({
-  //     address: tokenToSell,
-  //     abi: erc20abi,
-  //     functionName: 'approve',
-  //     args: [address, parseEther(amountToSell)]
-  //   });
-  // }
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+  }
+
+  const handleApprove = async ()=>{
+
+    try {
+      // First check if approval is needed
+      const amountToSellBigInt = parseEther(amountToSell)
+      setButtonClicked(true);
+      setButtonText("Approving Tokens...");
+      // If allowance is less than amount to sell, we need to approve
+      if (currentAllowance < amountToSellBigInt) {
+        // Approve the token transfer
+        await approveToken({
+          address: tokenToSell as `0x{string}`,
+          abi: erc20abi,
+          functionName: 'approve',
+          args: [address, amountToSellBigInt],
+        })
+
+        // Wait for approval transaction to complete
+        if (!isApproveSuccess) {
+          throw new Error('Token approval failed')
+        }
+      }
+    }catch(e){
+      console.log("Error occured ",e);
+      
+    }
+  }
+const handleCreateOrder = async ()=>{
+  await createOrder({
+    address,
+    abi,
+    functionName: 'createOrder',
+    args: [
+      tokenToSell,
+      tokenToBuy,
+      parseEther(amountToSell),
+      parseEther(amountToBuy),
+      parseEther(minTradeAmount),
+      parseEther(maxTradeAmount),
+      partialFill,
+      BigInt(timelock),
+      hashlock
+    ]
+  })
+}
+useWatchContractEvent({
+    address: tokenToSell as `0x{string}`,
+    abi:erc20abi,
+    eventName: 'Approval',
+    onLogs(logs) {
+      console.log('Approval event occured',logs);
+      setButtonText("Creating the Order...");
+      handleCreateOrder();
+    },
+})
+useWatchContractEvent({
+  address: address,
+  abi,
+  eventName: 'OrderCreated',
+  onLogs(logs) {
+    console.log('Order created!!');
+    toast.success("Order Created");
+    setButtonText("Create the Order");
+    setButtonClicked(false);  
+  },
+})
+
   
   return (
     <div className="container flex flex-col mx-auto gap-2 px-4 py-8">
@@ -174,22 +227,6 @@ const OrderBookPage = () => {
                       
                     )
                   }
-                  {/* {mockOrders.data?.map((order) => (
-                    <tr key={order.orderId} className="border-t">
-                      <td className="p-3">
-                        {(Number(order.amountToBuy) / Number(order.amountToSell)).toFixed(2)}
-                      </td>
-                      <td className="p-3">
-                        {order.amountToSell} {order.tokenToSell}
-                      </td>
-                      <td className="p-3">
-                        {order.amountToBuy} {order.tokenToBuy}
-                      </td>
-                      <td className="p-3">
-                        <Button>Take Order</Button>
-                      </td>
-                    </tr>
-                  ))} */}
                 </tbody>
               </table>
             </div>
@@ -304,13 +341,10 @@ const OrderBookPage = () => {
                   Allow partial fills
                 </label>
               </div>
-              <div className='flex gap-1'>
-              {/* <Button className="w-1/2 flex items-center justify-center" onClick={approve}>
-                Approve
-              </Button> */}
-              <Button className="w-full flex items-center justify-center" type="submit">
+              <div className='flex gap-1 flex-col'>
+              <Button className={`w-full flex items-center justify-center ${buttonClicked&&"bg-blue-800 text-gray-200"}`} onClick={handleApprove}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Order
+                {buttonText}
               </Button>
               </div>
             </form>

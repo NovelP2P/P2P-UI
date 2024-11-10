@@ -46,11 +46,12 @@ const Orders = ({id}:{id:BigInt}) => {
     })
     const orderArray = Array.isArray(orders.data)?orders.data:[]
     console.log(orderArray);
-    const token= tokenOptions[orderArray[2]];
+    const tokenToSell= tokenOptions[orderArray[2]];
+    const tokenToBuy= tokenOptions[orderArray[3]];
   return (
     <>
       <tr>
-        <td className="p-3">{parseFloat((orderArray[4]/orderArray[5]).toString())} {token}</td>
+        <td className="p-3">{(parseFloat(orderArray[4])/parseFloat(orderArray[5])).toString()} {tokenToBuy}/{tokenToSell}</td>
         <td className="p-3">{Number(orderArray[4])/10**18}</td>
         <td className="p-3">{Number(orderArray[7])/10**18}/{Number(orderArray[6])/10**18}</td>
         <td className="p-3">{new Date(Number(orderArray[9])*1000).toDateString()}</td>
@@ -63,5 +64,4 @@ const Orders = ({id}:{id:BigInt}) => {
     </>
   )
 }
-
 export default Orders

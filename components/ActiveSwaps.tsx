@@ -1,5 +1,5 @@
 import React, { ButtonHTMLAttributes, useState } from 'react';
-import { useReadContract, useWriteContract } from 'wagmi';
+import { useReadContract, useWatchContractEvent, useWriteContract } from 'wagmi';
 import { address, abi } from "@/app/utils/abi";
 import {
   Dialog,
@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import toast from 'react-hot-toast';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -19,7 +20,8 @@ interface swapProps{
   orderId:BigInt,
   participant:string,
   participantAmount:BigInt,
-  timelock:BigInt
+  timelock:BigInt,
+  status:number
 }
 
 const Button = ({ children, variant = 'primary', className = '', ...props }:ButtonProps) => {
@@ -50,7 +52,7 @@ const ActiveSwaps = ({id}: {id: BigInt[]}) => {
     functionName: 'getSwapBySwapId',
     args: [id]
   }) as {data:swapProps};
-
+console.log(swap);
   const handleVerifyClick = () => {
     setIsModalOpen(true);
   };
@@ -68,9 +70,17 @@ const ActiveSwaps = ({id}: {id: BigInt[]}) => {
       args:[id,secretKey]
     })
   };
-
+  useWatchContractEvent({
+    address,
+    abi,
+    eventName:"SwapCompleted",
+    onLogs(logs){
+      toast.success("Swap Completed!!")
+    }
+  })
   return (
     <>
+    {swap?.status==1 &&
       <tr className='text-black'>
         <td className="p-3">{swap?.swapId.toString()}</td>
         <td className="p-3">{swap?.orderId.toString()}</td>
@@ -85,7 +95,7 @@ const ActiveSwaps = ({id}: {id: BigInt[]}) => {
           </Button>
         </td>
       </tr>
-
+    } 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
