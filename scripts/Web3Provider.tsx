@@ -3,16 +3,15 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { mainnet, sepolia, unichainSepolia} from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-
+console.log("unichain id",unichainSepolia)
 export const config = createConfig(
   getDefaultConfig({
     // Your dApps chains
-    chains: [mainnet,sepolia,unichainSepolia],
+    chains: [sepolia,unichainSepolia],
     transports: {
       // RPC URL for each chain
-      [mainnet.id]: http(),
-      [sepolia.id]:http(),
-      [unichainSepolia.id]:http()
+	  [sepolia.id]:http(),
+      [unichainSepolia.id]:http(`https://unichain-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`)
     },
 
     // Required API Keys

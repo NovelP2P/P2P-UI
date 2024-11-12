@@ -20,7 +20,7 @@ const SwapPage = () => {
         abi,
         functionName:"orders",
         args:[BigInt(orderId)]
-    })
+    }) 
     const orderReceived = Array.isArray(order)?order:[];
 
     const {writeContract} = useWriteContract();
@@ -76,6 +76,10 @@ const SwapPage = () => {
           <h2 className="text-2xl font-bold">Initiate Swap</h2>
         </div>
         <div className="space-y-6">
+          <div>
+            <span className='font-bold'>Secret Hash :</span>
+            {orderReceived[10]!=undefined &&  <span>{`${orderReceived[10].slice(0,20)}...`}</span>}
+          </div>
           <div>
             <label htmlFor="amount" className="block font-medium mb-2">
               Amount
